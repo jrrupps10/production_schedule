@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Production Schedule</title>
+<style>
+:root{--bg:#eceff1;--surface:#fff;--ink:#1f272c;--muted:#5f6c74;--line:#d3d9dd;--accent:#2f4858;--amber:#b7791f;--amberbg:#fff3d6;--ok:#2f7d4f;--bad:#b3392b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14191c;--surface:#1c2328;--ink:#e5eaed;--muted:#94a1a9;--line:#2c353b;--accent:#8fb4cc;--amber:#e8b04a;--amberbg:#3a2f14;--ok:#5fbf86;--bad:#ec7a6c}}
+:root[data-theme="dark"]{--bg:#14191c;--surface:#1c2328;--ink:#e5eaed;--muted:#94a1a9;--line:#2c353b;--accent:#8fb4cc;--amber:#e8b04a;--amberbg:#3a2f14;--ok:#5fbf86;--bad:#ec7a6c}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Trebuchet MS","Segoe UI",system-ui,sans-serif}
+#app{max-width:1100px;margin:0 auto;padding:20px}
+h1{font:700 27px/1.2 Georgia,serif;margin:0 0 4px}
+h2{font:700 17px/1.3 Georgia,serif;margin:26px 0 10px}
+.sub,.muted{color:var(--muted)}
+.sub{margin:0 0 16px}
+input,select,button{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 9px}
+button{cursor:pointer}
+button.pri{background:var(--accent);color:var(--surface);border-color:var(--accent);font-weight:700}
+button.link{border:0;background:none;color:var(--accent);padding:0;font-weight:700}
+button.sm{padding:3px 8px;font-size:12px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row input{flex:1;min-width:150px}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 16px;min-width:130px}
+.stat b{display:block;font-size:22px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px;cursor:pointer;text-align:left;width:100%}
+.card h3{margin:0 0 2px;font-size:16px}
+.bar{height:7px;background:var(--line);border-radius:4px;overflow:hidden;margin:10px 0 6px}
+.bar i{display:block;height:100%;background:var(--ok)}
+.tag{display:inline-block;font-size:12px;font-weight:700;border-radius:4px;padding:1px 7px;border:1px solid var(--line)}
+.tag.p{color:var(--ok);border-color:var(--ok)}.tag.w{color:var(--amber);border-color:var(--amber)}
+.warn{background:var(--amberbg);color:var(--amber);border-radius:6px;padding:6px 10px;margin-top:8px;font-size:13px;font-weight:600}
+.wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;min-width:1040px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:13px;color:var(--muted)}
+td input[type=number]{width:70px}
+td input[type=text]{width:100%;min-width:150px}
+tr.done td{opacity:.6}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;min-width:200px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:12px 0}
+.fields label{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--muted)}
+.fields input{color:var(--ink)}
+.gr{display:flex;position:relative}.gl{position:sticky;left:0;z-index:2;flex:none;width:190px;padding:4px 10px;font-size:13px;background:var(--surface);border-bottom:1px solid var(--line);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:20px}
+.gt{position:relative;height:28px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(90deg,transparent 0 150px,color-mix(in srgb,var(--line) 50%,transparent) 150px 210px)}
+.gt.hd{height:36px}.gt.hd span{position:absolute;top:0;width:30px;text-align:center;font-size:10px;line-height:16px;color:var(--muted)}
+.gb{position:absolute;top:4px;height:20px;border:0;border-radius:4px;color:#fff;font-size:11px;text-align:left;padding:0 6px;overflow:hidden;white-space:nowrap;cursor:pointer}
+.gs{position:absolute;top:10px;height:8px;border-radius:4px;background:var(--accent);opacity:.45}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(110px,1fr));min-width:770px}
+.ch{padding:6px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--line)}
+.day{min-height:92px;padding:4px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:3px}
+.day.wk{background:color-mix(in srgb,var(--line) 35%,transparent)}.day.out{opacity:.45}.dn{font-size:12px;color:var(--muted)}.day.td .dn{color:var(--bad);font-weight:700}
+.ev{border:0;border-radius:4px;color:#fff;font-size:11px;padding:2px 5px;text-align:left;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+var KEY="roof-schedule-v1",S=null,view="";
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+function today(){return fmtD(new Date())}
+function seed(){var t=today();return{crews:["Crew A","Crew B","Crew C"],projects:[{id:"p1",name:"Miller Residence",addr:"1420 Aspen Ct",client:"J. Miller",start:t,scopes:[
+{id:"s1",name:"Tear-off",days:1,crew:"Crew A",status:"todo"},{id:"s2",name:"Underlayment & flashing",days:1,crew:"Crew A",status:"todo"},{id:"s3",name:"Shingle install",days:2,crew:"Crew B",status:"todo"},{id:"s4",name:"Cleanup & inspection",days:1,crew:"Crew C",status:"todo"}]}]}}
+if(!S||!S.projects)S=seed();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function fmtD(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
+function D(s){return new Date(s+"T12:00:00")}
+function nwd(d){while(d.getDay()==0||d.getDay()==6)d.setDate(d.getDate()+1);return d}
+function nice(s){return s?D(s).toLocaleDateString("en-US",{month:"short",day:"numeric"}):"–"}
+function e(s){var x=document.createElement("div");x.textContent=s==null?"":s;return x.innerHTML.replace(/"/g,"&quot;").replace(/'/g,"&#39;")}
+function sched(p){var cur=nwd(D(p.start||today()));return p.scopes.map(function(c){var s=c.s?nwd(D(c.s)):new Date(cur),en=new Date(s),n=Math.max(1,+c.days||1)-1;if(c.e&&D(c.e)>=s)en=D(c.e);else while(n>0){en.setDate(en.getDate()+1);if(en.getDay()!=0&&en.getDay()!=6)n--}cur=new Date(en);cur.setDate(cur.getDate()+1);cur=nwd(cur);return{s:fmtD(s),e:fmtD(en),d:wdc(s,en)}})}function wdc(a,b){var n=0,d=new Date(a);while(d<=b){if(d.getDay()!=0&&d.getDay()!=6)n++;d.setDate(d.getDate()+1)}return Math.max(1,n)}
+function info(p){var sc=sched(p),tot=0,dn=0,any=0;p.scopes.forEach(function(c,i){var d=sc[i].d;tot+=d;if(c.status=="done")dn+=d;if(c.status!="todo")any=1});
+var st=!p.scopes.length?"Not scheduled":dn==tot?"Complete":any?"In progress":"Scheduled";
+return{sc:sc,pct:tot?Math.round(dn/tot*100):0,st:st,start:sc.length?sc.map(function(x){return x.s}).sort()[0]:p.start,end:sc.length?sc.map(function(x){return x.e}).sort().pop():p.start,tot:tot}}
+function conflicts(){var all=[],m={};S.projects.forEach(function(p){var sc=sched(p);p.scopes.forEach(function(c,i){if(c.crew&&c.status!="done")all.push({k:c.id,p:p,c:c,s:sc[i].s,e:sc[i].e})})});
+all.forEach(function(a){all.forEach(function(b){if(a!==b&&a.c.crew==b.c.crew&&a.s<=b.e&&b.s<=a.e){m[a.k]=m[a.k]||"Overlaps with "+b.p.name+" – "+b.c.name+" ("+nice(b.s)+"–"+nice(b.e)+")"}})});return m}
+var mode="cards",cm=new Date();cm=new Date(cm.getFullYear(),cm.getMonth(),1);
+var COL=["#2f6f8f","#8a5a2b","#5b7a2e","#7a3f7f","#b0533a","#3f6b5b"];
+function cc(cr){var i=S.crews.indexOf(cr);return i<0?"#6b7780":COL[i%COL.length]}
+function addD(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x}
+function dd(a,b){return Math.round((b-a)/864e5)}
+function tabs(){return"<div class='row' style='margin:18px 0 4px'>"+[["cards","All projects"]].concat(sups().map(function(s){return["sup:"+s,s]}),[["gantt","Gantt"],["cal","Calendar"]]).map(function(t){return"<button class='"+(mode==t[0]?"pri":"")+"' data-act='mode' data-v='"+e(t[0])+"'>"+e(t[1])+"</button>"}).join("")+"</div>"}
+function legend(){var sw=function(c,n){return"<span><i style='display:inline-block;width:10px;height:10px;border-radius:2px;background:"+c+";margin-right:4px'></i>"+e(n)+"</span>"};return"<div class='row muted' style='margin:8px 0;font-size:13px'>"+S.crews.map(function(cr){return sw(cc(cr),cr)}).join("")+sw("#6b7780","Unassigned")+"</div>"}
+function gantt(){var lo=null,hi=null;
+S.projects.forEach(function(p){var sc=sched(p);sc.forEach(function(x){if(!lo||x.s<lo)lo=x.s;if(!hi||x.e>hi)hi=x.e})});
+if(!lo)return"<p class='muted' style='margin-top:12px'>Add scopes to a project and they will appear on the timeline.</p>";
+var a=D(lo),b=D(hi);a=addD(a,-((a.getDay()+6)%7));b=addD(b,(7-b.getDay())%7);
+var W=30,N=dd(a,b)+1,h=legend()+"<div class='wrap'><div style='position:relative;min-width:"+(190+N*W)+"px'>";
+h+="<div class='gr'><div class='gl'></div><div class='gt hd' style='width:"+N*W+"px'>";
+for(var i=0;i<N;i++){var d=addD(a,i);h+="<span style='left:"+i*W+"px'>"+(i==0||d.getDate()==1?d.toLocaleDateString("en-US",{month:"short"}):"&nbsp;")+"<br>"+d.getDate()+"</span>"}
+h+="</div></div>";
+S.projects.forEach(function(p){var f=info(p),sc=f.sc;if(!sc.length)return;
+h+="<div class='gr'><div class='gl'><button class='link' data-act='go' data-v='"+p.id+"'>"+e(p.name)+"</button></div><div class='gt' style='width:"+N*W+"px'><div class='gs' style='left:"+dd(a,D(f.start))*W+"px;width:"+(dd(D(f.start),D(f.end))+1)*W+"px'></div></div></div>";
+p.scopes.forEach(function(c,n){var s=sc[n];h+="<div class='gr'><div class='gl muted' style='padding-left:24px'>"+e((c.b?c.b+": ":"")+c.name)+"</div><div class='gt' style='width:"+N*W+"px'><button class='gb' data-act='go' data-v='"+p.id+"' style='left:"+dd(a,D(s.s))*W+"px;width:"+(dd(D(s.s),D(s.e))+1)*W+"px;background:"+cc(c.crew)+(c.status=='done'?";opacity:.5":"")+"' title='"+e(c.name+" – "+(c.crew||"Unassigned")+" – "+nice(s.s)+" to "+nice(s.e))+"'>"+e(c.crew||"")+"</button></div></div>"})});
+var t=dd(a,D(today()));if(t>=0&&t<N)h+="<div style='position:absolute;top:0;bottom:0;left:"+(190+t*W+W/2)+"px;width:2px;background:var(--bad);opacity:.6;pointer-events:none;z-index:1'></div>";
+return h+"</div></div>"}
+function cal(){var y=cm.getFullYear(),m=cm.getMonth(),first=new Date(y,m,1),st=addD(first,-first.getDay()),rows=Math.ceil((first.getDay()+new Date(y,m+1,0).getDate())/7),ev=[];
+S.projects.forEach(function(p){var sc=sched(p);p.scopes.forEach(function(c,n){ev.push({p:p,c:c,s:sc[n].s,e:sc[n].e})})});
+var h="<div class='row' style='margin:12px 0;justify-content:space-between'><div class='row'><button data-act='cal' data-v='-1'>Previous</button><button data-act='cal' data-v='0'>Today</button><button data-act='cal' data-v='1'>Next</button></div><b style='font:700 18px Georgia,serif'>"+first.toLocaleDateString("en-US",{month:"long",year:"numeric"})+"</b></div>"+legend()+"<div class='wrap'><div class='cal'>";
+["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(function(n){h+="<div class='ch'>"+n+"</div>"});
+for(var i=0;i<rows*7;i++){var d=addD(st,i),k=fmtD(d),wk=d.getDay()==0||d.getDay()==6,items=wk?[]:ev.filter(function(x){return x.s<=k&&k<=x.e});
+h+="<div class='day"+(wk?" wk":"")+(d.getMonth()!=m?" out":"")+(k==today()?" td":"")+"'><div class='dn'>"+d.getDate()+"</div>"+items.map(function(x){return"<button class='ev' style='background:"+cc(x.c.crew)+"' data-act='go' data-v='"+x.p.id+"' title='"+e(x.p.name+": "+x.c.name+" – "+(x.c.crew||"Unassigned"))+"'>"+e(x.p.name)+": "+e((x.c.b?x.c.b+" – ":"")+x.c.name)+"</button>"}).join("")+"</div>"}
+return h+"</div></div>"}
+function addCrew(n){if(!n)return"";var m=S.crews.filter(function(x){return x.toLowerCase()==n.toLowerCase()})[0];if(m)return m;S.crews.push(n);return n}
+function pr(p){return p.proc=p.proc||[]}
+function ob(m){return m.need?fmtD(addD(D(m.need),-Math.max(0,Math.round(+m.lead||0)))):""}
+function pst(p){var L=pr(p),t=today(),sn=fmtD(addD(D(t),3)),late=0,to=0,dn=0,lateo=0,soon=0;L.forEach(function(m){if(m.status=="Delivered")dn++;else{if(m.status=="To order"){to++;var o=ob(m);if(o&&o<t)lateo++;else if(o&&o<=sn)soon++}if(m.need&&m.need<t)late++}});return{n:L.length,dn:dn,to:to,late:late,lateo:lateo,soon:soon}}
+function pcard(p){var s=pst(p);if(!s.n)return"<div class='muted'>Materials: none listed</div>";return"<div class='muted'>Materials: "+s.dn+" of "+s.n+" delivered</div>"+(s.lateo?"<div class='warn' style='color:var(--bad)'>"+s.lateo+" order"+(s.lateo>1?"s":"")+" past lead time – order now</div>":"")+(s.soon?"<div class='warn'>"+s.soon+" to order within 3 days</div>":"")+(s.late?"<div class='warn' style='color:var(--bad)'>"+s.late+" material"+(s.late>1?"s":"")+" overdue</div>":"")+(s.to?"<div class='warn'>"+s.to+" material"+(s.to>1?"s":"")+" still to order</div>":"")}
+function proc(p){var L=pr(p),t=today(),h="<h2>Procurement</h2><div class='wrap'><table style='min-width:960px'><tr><th>Material</th><th>Supplier</th><th>Qty</th><th>Lead (days)</th><th>Needed by</th><th>Order by</th><th>Status</th><th></th></tr>";
+L.forEach(function(m,n){var o=ob(m),lo=m.status=="To order"&&o&&o<t,late=m.status!="Delivered"&&m.need&&m.need<t,a="data-i='"+n+"'";h+="<tr class='"+(m.status=="Delivered"?"done":"")+"'><td><input type='text' data-pf='item' "+a+" value='"+e(m.item)+"'>"+(lo?"<div class='warn' style='color:var(--bad)'>Order by "+nice(o)+" has passed – lead time at risk</div>":"")+(late?"<div class='warn'>Needed by "+nice(m.need)+" – not delivered</div>":"")+"</td><td><input type='text' data-pf='supplier' "+a+" value='"+e(m.supplier)+"'></td><td><input type='text' style='width:90px;min-width:0' data-pf='qty' "+a+" value='"+e(m.qty)+"'></td><td><input type='number' min='0' style='width:80px' data-pf='lead' "+a+" value='"+e(m.lead)+"'></td><td><input type='date' data-pf='need' "+a+" value='"+e(m.need)+"'></td><td"+(lo?" style='color:var(--bad);font-weight:700'":"")+">"+(m.need?nice(o):"–")+"</td><td><select data-pf='status' "+a+">"+["To order","Ordered","Delivered"].map(function(o){return"<option"+(o==m.status?" selected":"")+">"+o+"</option>"}).join("")+"</select></td><td><button class='sm' data-act='delproc' "+a+">Delete</button></td></tr>"});
+if(!L.length)h+="<tr><td colspan='8' class='muted'>No materials yet. Add the first one below.</td></tr>";
+return h+"</table></div><form class='row' data-form='addproc' style='margin-top:12px'><input name='item' placeholder='Material (e.g. architectural shingles)' required aria-label='Material' autocomplete='off'><input name='supplier' placeholder='Supplier' aria-label='Supplier' autocomplete='off'><input name='qty' placeholder='Qty' style='flex:0 0 90px;min-width:0' aria-label='Quantity' autocomplete='off'><input name='lead' type='number' min='0' placeholder='Lead (days)' style='flex:0 0 110px;min-width:0' aria-label='Lead time in days'><input name='need' type='date' style='flex:0 0 auto;min-width:0' aria-label='Needed by'><button class='pri'>Add material</button></form>"}
+function ordlist(){var L=[],t=today(),sn=fmtD(addD(D(t),3));
+S.projects.forEach(function(p){pr(p).forEach(function(m){if(m.status=="To order")L.push({p:p,m:m,o:ob(m)})})});
+if(!L.length)return"";
+L.sort(function(a,b){return(a.o||"9999")<(b.o||"9999")?-1:1});
+var h="<h2>Materials to order</h2><div class='wrap'><table style='min-width:720px'><tr><th>Material</th><th>Project</th><th>Supplier</th><th>Qty</th><th>Order by</th><th>Alert</th></tr>";
+L.forEach(function(x){var late=x.o&&x.o<t,soon=x.o&&!late&&x.o<=sn;
+h+="<tr><td>"+e(x.m.item)+"</td><td><button class='link' data-act='go' data-v='"+x.p.id+"'>"+e(x.p.name)+"</button></td><td>"+e(x.m.supplier)+"</td><td>"+e(x.m.qty)+"</td><td>"+(x.o?nice(x.o):"No date")+"</td><td>"+(late?"<span class='tag' style='color:var(--bad);border-color:var(--bad)'>Past lead time</span>":soon?"<span class='tag w'>Order within 3 days</span>":x.o?"<span class='tag'>On track</span>":"<span class='tag'>Add needed-by date</span>")+"</td></tr>"});
+return h+"</table></div>"}
+function sups(){var r=[];S.projects.forEach(function(p){if(p.sup&&r.indexOf(p.sup)<0)r.push(p.sup)});return r.sort()}
+function supName(n){if(!n)return"";var m=sups().filter(function(x){return x.toLowerCase()==n.toLowerCase()})[0];return m||n}
+function supopts(){return"<datalist id='sups'>"+sups().map(function(s){return"<option>"+e(s)+"</option>"}).join("")+"</datalist>"}
+function blds(p){var r=(p.bldgs||[]).slice();p.scopes.forEach(function(c){if(c.b&&r.indexOf(c.b)<0)r.push(c.b)});return r}
+function bname(p,n){if(!n)return"";var m=blds(p).filter(function(x){return x.toLowerCase()==n.toLowerCase()})[0];return m||n}
+function bform(p){var b=blds(p);return"<form class='row' data-form='addbldg' style='margin-top:14px'><input name='b' placeholder='"+(b.length?"Add another building":"Multiple buildings? Add one here (e.g. Building A)")+"' required aria-label='Building name' autocomplete='off'><button>Add building</button></form>"}
+function ord(p){var r=[];[""].concat(blds(p)).forEach(function(b){p.scopes.forEach(function(c,n){if((c.b||"")==b)r.push(n)})});return r}
+function bopts(p,sel){return"<option value=''>Whole project</option>"+blds(p).map(function(x){return"<option value='"+e(x)+"'"+(x==sel?" selected":"")+">"+e(x)+"</option>"}).join("")}
+function bhead(p,bg,f){var ix=[];p.scopes.forEach(function(c,n){if((c.b||"")==bg)ix.push(n)});var s=ix.map(function(n){return f.sc[n].s}).sort()[0],en=ix.map(function(n){return f.sc[n].e}).sort().pop();return"<tr><td colspan='8' style='background:var(--bg);font-weight:700'>"+e(bg||"Whole project")+" <span class='muted' style='font-weight:400'>"+ix.length+" scope"+(ix.length==1?"":"s")+(ix.length?" · "+nice(s)+" – "+nice(en):"")+"</span>"+(bg?" <button type='button' class='link sm' data-act='delbldg' data-b='"+e(bg)+"'>Remove building</button>":"")+"</td></tr>"}
+function go(v){view=v;try{location.hash=v}catch(x){}draw();window.scrollTo(0,0)}
+function proj(id){return S.projects.filter(function(p){return p.id==id})[0]}
+function draw(){var h=view&&proj(view)?page(proj(view)):home();document.getElementById("app").innerHTML=h}
+function home(){var cf=conflicts(),h="<h1>Production schedule</h1><p class='sub'>All projects at a glance. Select a project to manage its scope, durations, and crews.</p>";
+var act=0,days=0,nc=Object.keys(cf).length;S.projects.forEach(function(p){var i=info(p);if(i.st!="Complete")act++;days+=i.tot});
+h+="<div class='stats'><div class='stat'><b>"+act+"</b>open projects</div><div class='stat'><b>"+days+"</b>scheduled work days</div><div class='stat'><b>"+nc+"</b>crew conflicts</div><div class='stat'><b>"+S.projects.reduce(function(s,p){return s+pst(p).lateo},0)+"</b>late material orders</div></div>";
+if(mode.indexOf("sup:")==0&&sups().indexOf(mode.slice(4))<0)mode="cards";h+=tabs();if(mode=="gantt"||mode=="cal")h+=(mode=="gantt"?gantt():cal());else{h+="<h2>"+(mode.indexOf("sup:")==0?"Supervisor: "+e(mode.slice(4)):"Projects")+"</h2><form class='row' data-form='addproj'><input name='name' placeholder='New project name' required aria-label='Project name'><input name='addr' placeholder='Job address' aria-label='Address'><input name='sup' list='sups' placeholder='Supervisor' aria-label='Supervisor' autocomplete='off'>"+supopts()+"<input name='po' placeholder='PO#' aria-label='PO#' autocomplete='off' style='flex:0 0 120px;min-width:0'><input name='start' type='date' value='"+today()+"' style='flex:0 0 auto;min-width:0' aria-label='Start date'><button class='pri'>Add project</button></form><div class='grid' style='margin-top:12px'>";
+S.projects.forEach(function(p){if(mode.indexOf("sup:")==0&&p.sup!=mode.slice(4))return;var i=info(p),crews=[],w=0;p.scopes.forEach(function(c){if(c.crew&&crews.indexOf(c.crew)<0)crews.push(c.crew);if(cf[c.id])w=1});
+h+="<button class='card' data-act='go' data-v='"+p.id+"'><h3>"+e(p.name)+"</h3><div class='muted'>"+e(p.addr||"No address")+"</div>"+(p.sup?"<div class='muted'>Supervisor: "+e(p.sup)+"</div>":"")+"<div class='bar'><i style='width:"+i.pct+"%'></i></div><div class='row' style='justify-content:space-between'><span>"+i.pct+"% done</span><span class='tag "+(i.st=="In progress"?"p":"")+"'>"+i.st+"</span></div><div class='muted' style='margin-top:6px'>"+nice(i.start)+" – "+nice(i.end)+" · "+p.scopes.length+" scopes</div><div class='muted'>Crews: "+(crews.join(", ")||"none assigned")+"</div>"+pcard(p)+(w?"<div class='warn'>Crew conflict – open to review</div>":"")+"</button>"});
+if(!S.projects.length)h+="<p class='muted'>No projects yet. Add one above.</p>";
+h+="</div>";}return h;
+S.crews.forEach(function(cr){var next=null;S.projects.forEach(function(p){var sc=sched(p);p.scopes.forEach(function(c,i){if(c.crew==cr&&c.status!="done"&&(!next||sc[i].s<next.s))next={s:sc[i].s,e:sc[i].e,t:p.name+" – "+c.name}})});
+h+="<div class='chip'><b>"+e(cr)+"</b> <button class='link sm' data-act='delcrew' data-c='"+e(cr)+"' aria-label='Remove "+e(cr)+"'>Remove</button><div class='muted'>"+(next?"Next: "+e(next.t)+" ("+nice(next.s)+"–"+nice(next.e)+")":"Open")+"</div></div>"});
+return h+"</div><form class='row' data-form='addcrew' style='margin-top:10px'><input name='n' placeholder='New crew name' required aria-label='Crew name'><button>Add crew</button></form>"}
+function page(p){var i=info(p),cf=conflicts(),h="<button class='link' data-act='go' data-v=''>Back to all projects</button><h1 style='margin-top:10px'>"+e(p.name)+"</h1><p class='sub'>"+i.pct+"% complete · "+nice(i.start)+" – "+nice(i.end)+" · "+i.st+"</p><div class='bar'><i style='width:"+i.pct+"%'></i></div>";
+h+="<div class='fields'><label>Project name<input data-f='name' value='"+e(p.name)+"'></label><label>Address<input data-f='addr' value='"+e(p.addr)+"'></label><label>Client<input data-f='client' value='"+e(p.client)+"'></label><label>Start date<input type='date' data-f='start' value='"+e(p.start)+"'></label><label>Supervisor<input data-f='sup' list='sups' autocomplete='off' value='"+e(p.sup)+"'>"+supopts()+"</label><label>PO#<input data-f='po' autocomplete='off' value='"+e(p.po)+"'></label></div>";
+h+="<h2>Scope of work</h2><p class='muted' style='margin-top:-6px'>Scopes run in order, Monday to Friday. Change the days, start, or end and the dates update; later scopes follow. Clear a start date to let a scope follow the one before it.</p><div class='wrap'><table><tr><th>Scope</th><th>Days</th><th>Crew</th><th>Starts</th><th>Ends</th><th>Status</th>"+(blds(p).length?"<th>Building</th>":"")+"<th></th></tr>";
+var O=ord(p),mul=blds(p).length>0;O.forEach(function(n,k){var c=p.scopes[n],bg=c.b||"",nb=k==0||(p.scopes[O[k-1]].b||"")!=bg;if(mul&&nb)h+=bhead(p,bg,i);h+="<tr class='"+(c.status=="done"?"done":"")+"'><td"+(mul?" style='padding-left:30px'":"")+"><input type='text' data-sf='name' data-i='"+n+"' value='"+e(c.name)+"'>"+(cf[c.id]?"<div class='warn'>"+e(cf[c.id])+"</div>":"")+"</td><td><input type='number' min='1' data-sf='days' data-i='"+n+"' value='"+i.sc[n].d+"'></td><td><input type='text' list='crews' placeholder='Unassigned' autocomplete='off' data-sf='crew' data-i='"+n+"' value='"+e(c.crew)+"'></td><td><input type='date' data-sf='s' data-i='"+n+"' value='"+i.sc[n].s+"'></td><td><input type='date' data-sf='e' data-i='"+n+"' value='"+i.sc[n].e+"'></td><td><select data-sf='status' data-i='"+n+"'>"+[["todo","Not started"],["doing","In progress"],["done","Done"]].map(function(o){return"<option value='"+o[0]+"'"+(o[0]==c.status?" selected":"")+">"+o[1]+"</option>"}).join("")+"</select></td>"+(mul?"<td><select data-sf='b' data-i='"+n+"'>"+bopts(p,c.b)+"</select></td>":"")+"<td style='white-space:nowrap'><button class='sm' data-act='up' data-i='"+n+"' aria-label='Move up'>Up</button> <button class='sm' data-act='down' data-i='"+n+"' aria-label='Move down'>Down</button> <button class='sm' data-act='delscope' data-i='"+n+"'>Delete</button></td></tr>"});
+blds(p).forEach(function(bn){if(!p.scopes.some(function(c){return c.b==bn}))h+=bhead(p,bn,i)+"<tr><td colspan='8' class='muted' style='padding-left:30px'>No scopes in this building yet.</td></tr>"});if(!p.scopes.length&&!blds(p).length)h+="<tr><td colspan='8' class='muted'>No scopes yet. Add the first one below.</td></tr>";
+h+="</table></div>";
+h+="<form class='row' data-form='addscope' style='margin-top:12px'>"+(blds(p).length?"<select name='b' aria-label='Building'>"+bopts(p,"")+"</select>":"")+"<input name='name' placeholder='Scope of work' required aria-label='Scope' autocomplete='off'><input name='days' type='number' min='1' value='1' style='flex:0 0 80px;min-width:0' aria-label='Days'><input name='crew' list='crews' placeholder='Crew (type a new name)' aria-label='Crew' autocomplete='off'><datalist id='crews'>"+S.crews.map(function(cr){return"<option>"+e(cr)+"</option>"}).join("")+"</datalist><button class='pri'>Add scope</button></form>"+bform(p)+"";
+return h+proc(p)+"<p style='margin-top:30px'><button class='sm' data-act='delproj' data-v='"+p.id+"'>Delete this project</button></p>"}
+document.addEventListener("click",function(ev){var b=ev.target.closest("[data-act]");if(!b)return;var a=b.dataset.act,p=proj(view),i=+b.dataset.i;
+if(a=="go")return go(b.dataset.v);
+if(a=="mode"){mode=b.dataset.v;return draw()}
+if(a=="cal"){var v=+b.dataset.v,now=new Date();cm=v?new Date(cm.getFullYear(),cm.getMonth()+v,1):new Date(now.getFullYear(),now.getMonth(),1);return draw()}
+if(a=="delcrew"){var c=b.dataset.c;S.crews=S.crews.filter(function(x){return x!=c});S.projects.forEach(function(q){q.scopes.forEach(function(s){if(s.crew==c)s.crew=""})})}
+if(a=="delproj"){if(!confirm("Delete this project and its scopes?"))return;S.projects=S.projects.filter(function(q){return q.id!=b.dataset.v});view=""}
+if(a=="delscope")p.scopes.splice(i,1);
+if(a=="delbldg"){var bn=b.dataset.b;p.bldgs=(p.bldgs||[]).filter(function(x){return x!=bn});p.scopes.forEach(function(c){if(c.b==bn)c.b=""})}
+if(a=="delproc")pr(p).splice(i,1);
+if(a=="up"||a=="down"){var d2=a=="up"?-1:1,j=i+d2;while(j>=0&&j<p.scopes.length&&(p.scopes[j].b||"")!=(p.scopes[i].b||""))j+=d2;if(j>=0&&j<p.scopes.length){var tmp=p.scopes[i];p.scopes[i]=p.scopes[j];p.scopes[j]=tmp}}
+
+save();draw()});
+document.addEventListener("change",function(ev){var t=ev.target,p=proj(view);if(!p||(!t.dataset.f&&!t.dataset.sf&&!t.dataset.pf))return;
+if(t.dataset.f)p[t.dataset.f]=t.value||(t.dataset.f=="start"?today():"");if(t.dataset.f=="sup")p.sup=supName(t.value.trim());
+if(t.dataset.sf){var k=t.dataset.sf,n=+t.dataset.i,c=p.scopes[n];if(k!="days")c.days=sched(p)[n].d;
+if(k=="days"){c.days=Math.max(1,parseInt(t.value)||1);delete c.e}
+else if(k=="s"){if(t.value)c.s=t.value;else delete c.s;delete c.e}
+else if(k=="e"){if(t.value)c.e=t.value;else delete c.e}
+else{c[k]=t.value;if(k=="crew")c.crew=addCrew(t.value.trim());if(k=="b")c.b=bname(p,t.value.trim())}
+if(k=="e")c.days=sched(p)[n].d}
+if(t.dataset.pf)pr(p)[+t.dataset.i][t.dataset.pf]=t.value;
+save();draw()});
+document.addEventListener("submit",function(ev){var f=ev.target,k=f.dataset.form;if(!k)return;ev.preventDefault();var d=new FormData(f);
+if(k=="addproj"){var id="p"+Date.now();S.projects.push({id:id,name:d.get("name"),addr:d.get("addr"),sup:supName((d.get("sup")||"").trim()),po:(d.get("po")||"").trim(),client:"",start:d.get("start")||today(),scopes:[]});save();return go(id)}
+if(k=="addcrew"){var n=d.get("n").trim();if(n&&S.crews.indexOf(n)<0)S.crews.push(n)}
+if(k=="addbldg"){var q=proj(view),nm=bname(q,(d.get("b")||"").trim());if(nm){q.bldgs=q.bldgs||[];if(q.bldgs.indexOf(nm)<0)q.bldgs.push(nm)}}
+if(k=="addproc")pr(proj(view)).push({id:"m"+Date.now(),item:d.get("item"),supplier:d.get("supplier"),qty:d.get("qty"),lead:d.get("lead"),need:d.get("need"),status:"To order"});
+if(k=="addscope")proj(view).scopes.push({id:"s"+Date.now(),b:bname(proj(view),(d.get("b")||"").trim()),name:d.get("name"),days:Math.max(1,parseInt(d.get("days"))||1),crew:addCrew((d.get("crew")||"").trim()),status:"todo"});
+save();draw()});
+var h0=(location.hash||"").slice(1);if(h0&&proj(h0))view=h0;
+draw();
+</script>
+</body>
+</html>
